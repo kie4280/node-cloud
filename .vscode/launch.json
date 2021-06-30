@@ -11,7 +11,7 @@
             "skipFiles": [
                 "<node_internals>/**"
             ],
-            "program": "${workspaceFolder}/src/server.ts",
+            "program": "${workspaceFolder}/src/server/server.ts",
             "outFiles": [
                 "${workspaceFolder}/ts-build/**/*.js"
             ],
@@ -20,11 +20,24 @@
         {
             "type": "pwa-node",
             "request": "launch",
-            "name": "Test Dynu",
+            "name": "Launch peer_node",
             "skipFiles": [
                 "<node_internals>/**"
             ],
-            "program": "${workspaceFolder}/src/dynu/dynu_api.ts",
+            "program": "${workspaceFolder}/src/nodes/peer_node.ts",
+            "outFiles": [
+                "${workspaceFolder}/ts-build/**/*.js"
+            ],
+            "console": "integratedTerminal"
+        },
+        {
+            "type": "pwa-node",
+            "request": "launch",
+            "name": "Test firebase",
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "program": "${workspaceFolder}/src/nodes/firebase.ts",
             "outFiles": [
                 "${workspaceFolder}/ts-build/**/*.js"
             ],

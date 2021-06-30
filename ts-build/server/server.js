@@ -24,11 +24,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const express_session_1 = __importDefault(require("express-session"));
-const ngrok_1 = __importDefault(require("ngrok"));
 const https = __importStar(require("https"));
 const http = __importStar(require("http"));
 const fs_1 = __importDefault(require("fs"));
-const dynu_api_1 = require("./dynu/dynu_api");
+const config_1 = require("../config");
+const nodeConfig = config_1.loadConfig();
 const privkey = fs_1.default.readFileSync("/etc/letsencrypt/live/node-cloud.ddnsfree.com/privkey.pem", "utf8");
 const certificate = fs_1.default.readFileSync("/etc/letsencrypt/live/node-cloud.ddnsfree.com/cert.pem", "utf8");
 const ca = fs_1.default.readFileSync("/etc/letsencrypt/live/node-cloud.ddnsfree.com/chain.pem", "utf8");
@@ -46,15 +46,6 @@ httpServer.listen(3000, () => {
 httpsServer.listen(3003, () => {
     console.log("https listening on 3003");
 });
-async function startNG() {
-    const url = await ngrok_1.default.connect({
-        region: "ap",
-        addr: "https://localhost:3003",
-        authtoken: "1uQjXC5noW548mGRZinL6HoPI9o_39jaNDr9ChTT49yBiZD5P",
-    });
-    await dynu_api_1.updateWebRedirect(url);
-    console.log(url);
-}
 app.use(express_1.default.urlencoded({ extended: true }));
 app.use(express_1.default.json());
 app.use(express_session_1.default({
@@ -68,7 +59,4 @@ app.get("/", (req, res) => {
     res.status(200).send("hello");
 });
 app.use(express_1.default.static("static"));
-startNG().catch((err) => {
-    console.log(err);
-});
 //# sourceMappingURL=server.js.map

@@ -4,7 +4,9 @@ import ngrok from "ngrok";
 import * as https from "https";
 import * as http from "http";
 import fs from "fs";
-import { updateWebRedirect } from "./dynu/dynu_api";
+import { loadConfig } from "../config";
+
+const nodeConfig = loadConfig();
 
 const privkey = fs.readFileSync(
   "/etc/letsencrypt/live/node-cloud.ddnsfree.com/privkey.pem",
@@ -18,6 +20,8 @@ const ca = fs.readFileSync(
   "/etc/letsencrypt/live/node-cloud.ddnsfree.com/chain.pem",
   "utf8"
 );
+
+
 
 const credentials = {
   key: privkey,
@@ -37,15 +41,7 @@ httpsServer.listen(3003, () => {
   console.log("https listening on 3003");
 });
 
-async function startNG() {
-  const url = await ngrok.connect({
-    region: "ap",
-    addr: "https://localhost:3003",
-    authtoken: "1uQjXC5noW548mGRZinL6HoPI9o_39jaNDr9ChTT49yBiZD5P",
-  });
-  await updateWebRedirect(url);
-  console.log(url);
-}
+
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
@@ -66,6 +62,3 @@ app.get("/", (req, res) => {
 
 app.use(express.static("static"));
 
-startNG().catch((err) => {
-  console.log(err);
-});
