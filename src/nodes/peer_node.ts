@@ -1,13 +1,12 @@
 import ngrok from "ngrok";
-import { loadConfig } from "../config";
+import { loadConfig, NODE_CONFIG } from "../config";
 import { Firebase, NODE } from "./firebase";
-import express from "express";
-import express_session from "express-session";
+import { startServer } from "./server";
+import axios from "axios";
 
-const nodeConfig = loadConfig();
 let fireb: Firebase = undefined;
 
-async function startNetwork() {
+async function startNetwork(nodeConfig: NODE_CONFIG) {
   const url = await ngrok.connect({
     region: nodeConfig.ngrok_region,
     addr: "http://localhost:" + nodeConfig.ngrok_port,
@@ -26,33 +25,79 @@ async function startNetwork() {
     nodeConfig.firebase_config.database_url
   );
   await fireb.setNode(n);
+  return nodeConfig;
 }
 
-const app: express.Application = express();
+async function discoverNodes(nodeConfig: NODE_CONFIG): Promise<Array<NODE>> {
+  const others = new Array(...fireb.getNodes());
+  others.forEach((n, i, obj) => {
+    if (n.node_name == nodeConfig.node_name) {
+      others.splice(i, 1);
+    }
+  });
 
-app.listen(nodeConfig.ngrok_port, () => {
-  console.log("http listening on " + nodeConfig.ngrok_port);
-});
+  return others;
+}
 
-app.use(express.urlencoded({ extended: true }));
-app.use(express.json());
-app.use(
-  express_session({
-    saveUninitialized: false,
-    secret: "df4t3g8rybuib",
-    resave: false,
-  })
-);
+async function pingNodes(nodes: Array<NODE>) {
+  nodes.forEach(async (n, i, obj) => {
+    try {
+      const res = await axios.get(n.url + "/status");
+      const status = res.data;
+      if (status == 404) {
+        const a = n;
+        a.status = "offline";
+        fireb.setNode(a);
+      }
+    } catch (err) {
+      console.log("error at ping peers");
+      console.log(err);
+    }
+  });
+}
 
-// end middleware
+export function updateNode(nodeConfig: NODE_CONFIG) {
+  discoverNodes(nodeConfig)
+    .then((r) => {
+      pingNodes(r);
+    })
+    .then(() => {
+      console.log("ping");
+    })
+    .catch((err) => {
+      console.log(err);
+    });
+}
 
-app.get("/", (req, res) => {
-  console.log(req.body);
-  res.status(200).send("hello");
-});
+export function initNode(nodeConfig: NODE_CONFIG) {
+  startNetwork(nodeConfig)
+    .then(discoverNodes)
+    .then((r) => {
+      console.log(r);
+      return r;
+    })
+    .then(() => {})
+    .catch((err) => {
+      console.log(err);
+    });
+}
 
-app.use(express.static("static"));
+export function delay(ms: number) {
+  return new Promise<void>((resolve) => {
+    setTimeout(resolve, ms);
+  });
+}
 
-startNetwork().catch((err) => {
-  console.log(err);
-});
+// startServer();
+
+// initNode();
+
+// delay(10000)
+//   .then(() => {
+//     interv = setInterval(() => {
+//       updateNode();
+//     }, PING_INTERVAL);
+//   })
+//   .catch((err) => {
+//     console.log(err);
+//   });

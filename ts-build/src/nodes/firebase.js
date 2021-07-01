@@ -3,13 +3,14 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.Firebase = void 0;
 const config_1 = require("../config");
 const firebase_admin_1 = __importDefault(require("firebase-admin"));
 const nodeConfig = config_1.loadConfig();
 class Firebase {
-    constructor(name, database_url) {
+    constructor(node_name, database_url) {
         this.initialize(database_url);
-        this.node_name = name;
+        this.node_name = node_name;
     }
     initialize(database_url, serviceAccount = "firebase-adminsdk.json") {
         this.app = firebase_admin_1.default.initializeApp({
@@ -17,32 +18,31 @@ class Firebase {
             databaseURL: database_url,
         });
         this.database = firebase_admin_1.default.database(this.app);
+        this.database.ref("nodes").on("value", (snap) => {
+            if (!snap.exists()) {
+                this.nodes = [];
+            }
+            else {
+                this.nodes = new Array();
+                snap.forEach((sn) => {
+                    this.nodes = this.nodes.concat([sn.toJSON()]);
+                });
+            }
+        });
     }
-    async getURLs() {
-        const r = this.database.ref("nodes");
-        const snapshot = await r.get();
-        if (snapshot.exists()) {
-            const v = snapshot.toJSON();
-            return v;
-        }
-        return undefined;
+    getNodes() {
+        const arr = Array(...this.nodes);
+        return arr;
     }
-    async getNode(name) {
-        const r = this.database.ref("nodes").child(name);
-        return r.toJSON();
-    }
-    async nodeCount() {
-        const r = await this.database.ref("nodes").get();
-        if (!r.exists()) {
-            return 0;
-        }
-        return r.numChildren();
+    nodeCount() {
+        return this.nodes.length;
     }
     async setNode(n) {
-        const r = this.database.ref("nodes").child(this.node_name);
+        const r = this.database.ref("nodes").child(n.node_name);
         const res = await r.set(n);
     }
 }
+exports.Firebase = Firebase;
 function test() {
     const f = new Firebase("node2", nodeConfig.firebase_config.database_url);
     const n = {
@@ -57,9 +57,7 @@ function test() {
         .catch((err) => {
         console.log(err);
     });
-    f.nodeCount().then((r) => {
-        console.log(r);
-    });
+    f.nodeCount();
 }
 // test();
 //# sourceMappingURL=firebase.js.map

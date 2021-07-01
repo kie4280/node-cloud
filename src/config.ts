@@ -11,13 +11,10 @@ type NODE_CONFIG = {
   };
 };
 
-var nodeConfig: NODE_CONFIG = undefined;
-
 function loadConfig(filename: string = "nodeconfig.json"): NODE_CONFIG {
-  if (nodeConfig) {
-    return nodeConfig;
-  }
-  nodeConfig = JSON.parse(fs.readFileSync(filename).toString());
+  const nodeConfig: NODE_CONFIG = JSON.parse(
+    fs.readFileSync(filename).toString()
+  );
   return nodeConfig;
 }
 

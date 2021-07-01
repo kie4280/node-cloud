@@ -16,6 +16,8 @@ export class Firebase {
   app: admin.app.App;
   database: admin.database.Database;
   node_name: string;
+  private nodes: Array<NODE>;
+
   constructor(node_name: string, database_url) {
     this.initialize(database_url);
     this.node_name = node_name;
@@ -31,35 +33,29 @@ export class Firebase {
     });
 
     this.database = admin.database(this.app);
+    this.database.ref("nodes").on("value", (snap) => {
+      if (!snap.exists()) {
+        this.nodes = [];
+      } else {
+        this.nodes = new Array<NODE>();
+        snap.forEach((sn) => {
+          this.nodes = this.nodes.concat([sn.toJSON() as NODE]);
+        });
+      }
+    });
   }
 
-  public async getURLs() {
-    const r = this.database.ref("nodes");
-    const snapshot = await r.get();
-    if (snapshot.exists()) {
-      const v = snapshot.toJSON();
-      return v;
-    }
-    return undefined;
+  public getNodes(): Array<NODE> {
+    const arr = Array<NODE>(...this.nodes);
+    return arr;
   }
 
-  public async getNode(name: string) {
-    const r = this.database.ref("nodes").child(name);
-
-    return r.toJSON();
-  }
-
-  public async nodeCount() {
-    const r = await this.database.ref("nodes").get();
-    if (!r.exists()) {
-      return 0;
-    }
-    return r.numChildren();
+  public nodeCount() {
+    return this.nodes.length;
   }
 
   public async setNode(n: NODE) {
-    const r = this.database.ref("nodes").child(this.node_name);
-
+    const r = this.database.ref("nodes").child(n.node_name);
     const res = await r.set(n);
   }
 }
@@ -78,9 +74,7 @@ function test() {
     .catch((err) => {
       console.log(err);
     });
-  f.nodeCount().then((r) => {
-    console.log(r);
-  });
+  f.nodeCount();
 }
 
 // test();

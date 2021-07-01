@@ -1,1 +1,0 @@
-{"version":3,"file":"peer_node.js","sourceRoot":"","sources":["../../src/client/peer_node.ts"],"names":[],"mappings":";;;;;AAAA,kDAA0B;AAE1B,KAAK,UAAU,OAAO;IAClB,MAAM,GAAG,GAAG,MAAM,eAAK,CAAC,OAAO,CAAC;QAC9B,MAAM,EAAE,UAAU,CAAC,YAAY;QAC/B,IAAI,EAAE,wBAAwB;QAC9B,SAAS,EAAE,UAAU,CAAC,aAAa;KACpC,CAAC,CAAC;IACH,OAAO,CAAC,GAAG,CAAC,GAAG,CAAC,CAAC;AACnB,CAAC"}
