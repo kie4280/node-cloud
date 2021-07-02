@@ -1,15 +1,32 @@
 import * as React from "react";
 import "../css/sidebars.css";
 
-class Main extends React.Component<any, any> {
+interface Main_state {
+  showing: number;
+}
+
+class Main extends React.Component<any, Main_state> {
   constructor(props) {
     super(props);
+    this.state = { showing: 0 };
   }
 
   render() {
+    let show = undefined;
+    switch (this.state.showing) {
+      case 0:
+        show = <div className="horizontal-filler"></div>
+        
+        break;
+    
+      default:
+        show = <div className="horizontal-filler"></div>
+        break;
+    }
     return (
-      <div>
+      <div className="horizontal-panel-divider">
         <SideBar />
+        {/* {show} */}
       </div>
     );
   }
@@ -24,7 +41,7 @@ class SideBar extends React.Component<any, any> {
     return (
       <div
         className="d-flex flex-column flex-shrink-0 bg-light"
-        style={{ width: "4.5rem" }}
+        style={{ width: "4.5rem", height: "100vh" }}
       >
         <a
           href="/"
@@ -33,10 +50,8 @@ class SideBar extends React.Component<any, any> {
           data-bs-toggle="tooltip"
           data-bs-placement="right"
         >
-          <svg className="bi" width={40} height={32}>
-            <use xlinkHref="#bootstrap" />
-          </svg>
-          <span className="visually-hidden">Icon-only</span>
+          <i className="bi bi-cloud" style={{ fontSize: 40 }}></i>
+          <i style={{ fontSize: 15 }}>Node-cloud</i>
         </a>
         <ul className="nav nav-pills nav-flush flex-column mb-auto text-center">
           <li>
@@ -59,7 +74,7 @@ class SideBar extends React.Component<any, any> {
               data-bs-toggle="tooltip"
               data-bs-placement="right"
             >
-              <i className="bi bi-house" style={{ fontSize: 30 }}></i>
+              <i className="bi bi-speedometer2" style={{ fontSize: 30 }}></i>
             </a>
           </li>
           <li>
@@ -128,13 +143,7 @@ class SideBar extends React.Component<any, any> {
             data-bs-toggle="dropdown"
             aria-expanded="false"
           >
-            <img
-              src="https://github.com/mdo.png"
-              alt="mdo"
-              className="rounded-circle"
-              width={24}
-              height={24}
-            />
+            <i className="bi bi-gear" style={{ fontSize: 30 }}></i>
           </a>
           <ul
             className="dropdown-menu text-small shadow"
