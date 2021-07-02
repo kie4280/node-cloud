@@ -1,3 +1,5 @@
 node_modules/**
-nodeconfig.json
+nodeconfig*.json
 firebase-adminsdk.json
+dist/**
+ts-build/**

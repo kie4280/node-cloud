@@ -1,7 +1,6 @@
 import ngrok from "ngrok";
 import { loadConfig, NODE_CONFIG } from "../config";
 import { Firebase, NODE } from "./firebase";
-import { startServer } from "./server";
 import axios from "axios";
 
 let fireb: Firebase = undefined;
@@ -56,7 +55,7 @@ async function pingNodes(nodes: Array<NODE>) {
   });
 }
 
-export function updateNode(nodeConfig: NODE_CONFIG) {
+function updateNode(nodeConfig: NODE_CONFIG) {
   discoverNodes(nodeConfig)
     .then((r) => {
       pingNodes(r);
@@ -69,7 +68,7 @@ export function updateNode(nodeConfig: NODE_CONFIG) {
     });
 }
 
-export function initNode(nodeConfig: NODE_CONFIG) {
+function initNode(nodeConfig: NODE_CONFIG) {
   startNetwork(nodeConfig)
     .then(discoverNodes)
     .then((r) => {
@@ -82,7 +81,7 @@ export function initNode(nodeConfig: NODE_CONFIG) {
     });
 }
 
-export function delay(ms: number) {
+function delay(ms: number) {
   return new Promise<void>((resolve) => {
     setTimeout(resolve, ms);
   });
@@ -101,3 +100,5 @@ export function delay(ms: number) {
 //   .catch((err) => {
 //     console.log(err);
 //   });
+
+export { delay, initNode, updateNode };

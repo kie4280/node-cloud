@@ -8,7 +8,7 @@ module.exports = {
     extensions: [".ts", ".tsx", ".js"],
   },
   output: {
-    path: path.join(__dirname, "/out"),
+    path: path.join(__dirname, "/dist"),
     filename: "bundle.min.js",
   },
   module: {
@@ -18,6 +18,10 @@ module.exports = {
         loader: "ts-loader",
         exclude: /node_modules/,
       },
+      {
+        test: /\.css$/i, // Only .css files
+        use: ["style-loader", "css-loader"], // Run both loaders
+      }
     ],
   },
   plugins: [
@@ -29,5 +33,12 @@ module.exports = {
     react: "React",
     "react-dom": "ReactDOM",
     "react-router": "ReactRouter",
+  },
+
+  watchOptions: {
+    ignored: ["**/node_modules"],
+  },
+  devServer: {
+    contentBase: path.join(__dirname, "dist"),
   },
 };

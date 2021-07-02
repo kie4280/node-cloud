@@ -8,5 +8,5 @@
     "outDir": "ts-build",
     "jsx": "react"
   },
-  "exclude": ["node_modules", "**/node_modules/*"]
+  "exclude": ["node_modules", "**/node_modules/*", "dist", "static"]
 }
