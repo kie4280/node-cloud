@@ -1,49 +1,6 @@
 import * as React from "react";
 import "../css/sidebars.css";
-
-interface Main_state {
-  showing: string;
-}
-
-class Main extends React.Component<any, Main_state> {
-  constructor(props) {
-    super(props);
-    this.state = { showing: props.showing ? props.showing : "" };
-  }
-
-  render() {
-    let show = undefined;
-    switch (this.state.showing) {
-      case "Home":
-        show = <h1>hi</h1>;
-
-        break;
-
-      default:
-        show = (
-          <div className="horizontal-filler">
-            <h1>Nothing here</h1>
-          </div>
-        );
-        break;
-    }
-
-    return (
-      <div className="horizontal-panel-divider">
-        <SideBar buttonCB={this.onModeChange.bind(this)} />
-        {show}
-      </div>
-    );
-  }
-
-  public onModeChange(e: Event) {
-    e.preventDefault();
-    console.log(e);
-    this.setState((state, props) => {
-      return { showing: (e.target as any).title };
-    });
-  }
-}
+import { HomePage, DashPage } from "./page";
 
 class SideBar extends React.Component<any, any> {
   constructor(props) {
@@ -60,94 +17,43 @@ class SideBar extends React.Component<any, any> {
           href="/"
           className="d-block p-3 link-dark text-decoration-none"
           title="Icon-only"
-          data-bs-toggle="tooltip"
+          data-bs-toggle="tooltip tab"
           data-bs-placement="right"
+          data-bs-target="#home-tab"
         >
           <i className="bi bi-cloud" style={{ fontSize: 40 }}></i>
           <i style={{ fontSize: 15 }}>Node-cloud</i>
         </a>
-        <ul className="nav nav-pills nav-flush flex-column mb-auto text-center">
+        <ul
+          className="nav nav-pills nav-flush flex-column mb-auto text-center"
+          role="tablist"
+        >
           <li>
-            <a
-              href="#"
-              className="nav-link py-3 border-bottom"
+            <button
+              className="nav-link active container-fluid border-bottom"
               aria-current="page"
               title="Home"
-              data-bs-toggle="tooltip"
+              type="button"
+              data-bs-toggle="tab"
               data-bs-placement="right"
-              onClick={this.props.buttonCB}
+              data-bs-target="#home-tab"
+              role="tab"
             >
               <i className="bi bi-house" style={{ fontSize: 30 }}></i>
-            </a>
+            </button>
           </li>
           <li>
-            <a
-              href="#"
-              className="nav-link py-3 border-bottom"
+            <button
+              className="nav-link container-fluid border-bottom"
               title="Dashboard"
-              data-bs-toggle="tooltip"
+              type="button"
+              data-bs-toggle="tab"
               data-bs-placement="right"
-              onClick={this.props.buttonCB}
+              data-bs-target="#dashboard-tab"
+              role="tab"
             >
               <i className="bi bi-speedometer2" style={{ fontSize: 30 }}></i>
-            </a>
-          </li>
-          <li>
-            <a
-              href="#"
-              className="nav-link py-3 border-bottom"
-              title="Orders"
-              data-bs-toggle="tooltip"
-              data-bs-placement="right"
-            >
-              <svg
-                className="bi"
-                width={24}
-                height={24}
-                role="img"
-                aria-label="Orders"
-              >
-                <use xlinkHref="#table" />
-              </svg>
-            </a>
-          </li>
-          <li>
-            <a
-              href="#"
-              className="nav-link py-3 border-bottom"
-              title="Products"
-              data-bs-toggle="tooltip"
-              data-bs-placement="right"
-            >
-              <svg
-                className="bi"
-                width={24}
-                height={24}
-                role="img"
-                aria-label="Products"
-              >
-                <use xlinkHref="#grid" />
-              </svg>
-            </a>
-          </li>
-          <li>
-            <a
-              href="#"
-              className="nav-link py-3 border-bottom"
-              title="Customers"
-              data-bs-toggle="tooltip"
-              data-bs-placement="right"
-            >
-              <svg
-                className="bi"
-                width={24}
-                height={24}
-                role="img"
-                aria-label="Customers"
-              >
-                <use xlinkHref="#people-circle" />
-              </svg>
-            </a>
+            </button>
           </li>
         </ul>
         <div className="dropdown border-top">
@@ -186,6 +92,65 @@ class SideBar extends React.Component<any, any> {
         </div>
       </div>
     );
+  }
+}
+
+const mainscreen = (
+  <div className="horizontal-panel-divider">
+    <SideBar />
+    <div className="tab-content" id="myTabContent">
+      <div
+        className="tab-pane fade show active"
+        id="home-tab"
+        role="tabpanel"
+        aria-labelledby="home-tab"
+      >
+        <HomePage />
+      </div>
+      <div
+        className="tab-pane fade"
+        id="dashboard-tab"
+        role="tabpanel"
+        aria-labelledby="dashboard-tab"
+      >
+        <DashPage />
+      </div>
+      <div
+        className="tab-pane fade"
+        id="contact"
+        role="tabpanel"
+        aria-labelledby="contact-tab"
+      ></div>
+    </div>
+  </div>
+);
+
+interface Main_state {
+  showing: string;
+}
+
+class Main extends React.Component<any, Main_state> {
+  constructor(props) {
+    super(props);
+    this.state = { showing: props.showing ? props.showing : "" };
+  }
+
+  render() {
+    let show = undefined;
+    switch (this.state.showing) {
+      case "Main":
+        show = mainscreen;
+        break;
+      default:
+        show = (
+          <div className="horizontal-filler">
+            <h1>Nothing here</h1>
+          </div>
+        );
+        break;
+    }
+
+    return show;
   }
 }
 

@@ -15,16 +15,19 @@ class App extends React.Component<any, App_state> {
   }
 
   render() {
+    let screen = undefined;
     switch (this.state.mode) {
       case 0:
-        return <Welcome />;
-
+        screen = <Welcome />;
+        break;
       case 1:
-        return <Main />;
+        screen = <Main showing="Main"/>;
+        break;
       default:
-        return <ErrorScreen />;
+        screen = <div></div>;
         break;
     }
+    return <ErrorScreen>{screen}</ErrorScreen>;
   }
 
   public changeMode(mode: number) {
@@ -44,13 +47,25 @@ class Welcome extends React.Component {
   }
 }
 
-class ErrorScreen extends React.Component {
+class ErrorScreen extends React.Component<any, any> {
+  constructor(props) {
+    super(props);
+    this.state = { has_error: false, errInfo: "" };
+  }
+
+  componentDidCatch(error, errInfo) {
+    this.setState({ has_error: true, errInfo: errInfo });
+  }
+
   render() {
-    return (
-      <div>
-        <h1>Sorry, an error occured</h1>
-      </div>
-    );
+    if (this.state.has_error) {
+      return (
+        <div>
+          <h1 className="m-1 p-4">Sorry, an error occured</h1>
+        </div>
+      );
+    }
+    return this.props.children;
   }
 }
 
