@@ -2,33 +2,46 @@ import * as React from "react";
 import "../css/sidebars.css";
 
 interface Main_state {
-  showing: number;
+  showing: string;
 }
 
 class Main extends React.Component<any, Main_state> {
   constructor(props) {
     super(props);
-    this.state = { showing: 0 };
+    this.state = { showing: props.showing ? props.showing : "" };
   }
 
   render() {
     let show = undefined;
     switch (this.state.showing) {
-      case 0:
-        show = <div className="horizontal-filler"></div>
-        
+      case "Home":
+        show = <h1>hi</h1>;
+
         break;
-    
+
       default:
-        show = <div className="horizontal-filler"></div>
+        show = (
+          <div className="horizontal-filler">
+            <h1>Nothing here</h1>
+          </div>
+        );
         break;
     }
+
     return (
       <div className="horizontal-panel-divider">
-        <SideBar />
-        {/* {show} */}
+        <SideBar buttonCB={this.onModeChange.bind(this)} />
+        {show}
       </div>
     );
+  }
+
+  public onModeChange(e: Event) {
+    e.preventDefault();
+    console.log(e);
+    this.setState((state, props) => {
+      return { showing: (e.target as any).title };
+    });
   }
 }
 
@@ -62,6 +75,7 @@ class SideBar extends React.Component<any, any> {
               title="Home"
               data-bs-toggle="tooltip"
               data-bs-placement="right"
+              onClick={this.props.buttonCB}
             >
               <i className="bi bi-house" style={{ fontSize: 30 }}></i>
             </a>
@@ -73,6 +87,7 @@ class SideBar extends React.Component<any, any> {
               title="Dashboard"
               data-bs-toggle="tooltip"
               data-bs-placement="right"
+              onClick={this.props.buttonCB}
             >
               <i className="bi bi-speedometer2" style={{ fontSize: 30 }}></i>
             </a>
@@ -149,11 +164,6 @@ class SideBar extends React.Component<any, any> {
             className="dropdown-menu text-small shadow"
             aria-labelledby="dropdownUser3"
           >
-            <li>
-              <a className="dropdown-item" href="#">
-                New project...
-              </a>
-            </li>
             <li>
               <a className="dropdown-item" href="#">
                 Settings

@@ -7,7 +7,7 @@ html {
   height: -webkit-fill-available;
 }
 
-main {
+main .horizontal-panel-divider {
   display: flex;
   flex-wrap: nowrap;
   height: 100vh;
@@ -15,16 +15,6 @@ main {
   max-height: 100vh;
   overflow-x: auto;
   overflow-y: hidden;
-}
-
-.horizontal-panel-divider {
-  display: flex;
-  flex-wrap: nowrap;
-  height: 100vh;
-  height: -webkit-fill-available;
-  max-height: 100vh;
-  overflow-x: visible;
-  overflow-y: visible;
 }
 
 .horizontal-filler {
