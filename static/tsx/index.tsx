@@ -7,7 +7,6 @@ import {
   HashRouter as Router,
   Switch,
   Route,
-  Link,
   Redirect,
   withRouter,
 } from "react-router-dom";
@@ -54,57 +53,51 @@ class PrivateRoute extends React.Component<any, any> {
 
 const PrivateRouter = withRouter(PrivateRoute);
 
-class App extends React.Component<any, App_context> {
-  constructor(props) {
-    super(props);
-    this.state = {
-      signin: false,
-      userCred: null,
-    };
-    console.log("app constructed");
-  }
+function App(props) {
+  const [state, setState] = React.useState<App_context>({
+    signin: false,
+    userCred: null,
+  });
 
-  render() {
-    return (
-      <ErrorScreen>
-        <AppContext.Provider value={this.state}>
-          <Router>
-            <Switch>
-              <PrivateRouter path="/home" exact>
-                <Main showing="Main" />
-              </PrivateRouter>
-              <Route path="/" exact>
-                <Redirect to="/home" />
-              </Route>
-              <PrivateRouter path="/about" exact>
-                <div>
-                  <h1>about page</h1>
-                </div>
-              </PrivateRouter>
-              <Route path="/login" exact>
-                <LoginScreenRouter loginCB={this.onLogin} />
-              </Route>
-
-              {/* show not found */}
-              <Route path="/">
-                <div className="container-sm align-content-center">
-                  <h1 className="text-center">Not found</h1>
-                </div>
-              </Route>
-            </Switch>
-          </Router>
-        </AppContext.Provider>
-      </ErrorScreen>
-    );
-  }
-
-  onLogin = (cred: firebase.auth.UserCredential) => {
-    this.setState({
+  function onLogin(cred: firebase.auth.UserCredential) {
+    setState({
       signin: true,
       userCred: cred,
     });
     console.log("on login called");
-  };
+  }
+
+  return (
+    <ErrorScreen>
+      <AppContext.Provider value={state}>
+        <Router>
+          <Switch>
+            <PrivateRouter path="/home" exact>
+              <Main showing="Main" />
+            </PrivateRouter>
+            <Route path="/" exact>
+              <Redirect to="/home" />
+            </Route>
+            <Route path="/about" exact>
+              <div>
+                <h1>about page</h1>
+              </div>
+            </Route>
+            <Route path="/login" exact>
+              <LoginScreenRouter loginCB={onLogin} />
+            </Route>
+
+            {/* show if not found */}
+            <Route path="/">
+              <div className="container-sm align-content-center">
+                <h1 className="text-center">Not found</h1>
+              </div>
+            </Route>
+          </Switch>
+        </Router>
+      </AppContext.Provider>
+    </ErrorScreen>
+  );
 }
 
 interface LoginScreen_state {
@@ -174,13 +167,8 @@ class LoginScreen extends React.Component<any, LoginScreen_state> {
   }
 
   render() {
-    console.log("render login");
-    console.log(this.props);
     const { match, location, history } = this.props;
     if (this.context.signin) {
-      console.log(this.props.history);
-      
-
       if (location.state) {
         return <Redirect to={location.state.from} />;
       }
@@ -282,8 +270,6 @@ class ErrorScreen extends React.Component<any, any> {
   }
 }
 
-const AppHandle = React.createRef<App>();
+ReactDOM.render(<App />, document.getElementById("root"));
 
-ReactDOM.render(<App ref={AppHandle} />, document.getElementById("root"));
-
-export { AppHandle, AppContext, App_context };
+export { AppContext, App_context };
