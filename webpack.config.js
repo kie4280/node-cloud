@@ -21,7 +21,7 @@ module.exports = {
       {
         test: /\.css$/i, // Only .css files
         use: ["style-loader", "css-loader"], // Run both loaders
-      }
+      },
     ],
   },
   plugins: [
@@ -33,6 +33,9 @@ module.exports = {
     react: "React",
     "react-dom": "ReactDOM",
     "react-router": "ReactRouter",
+    "react-router-dom":"ReactRouterDOM",
+    firebase: "firebase",
+    firebaseui: "firebaseui",
   },
 
   watchOptions: {
@@ -40,5 +43,10 @@ module.exports = {
   },
   devServer: {
     contentBase: path.join(__dirname, "dist"),
+    historyApiFallback: {
+      rewrites: [
+        { from: /.*/, to: '/index.html' },
+      ],
+    },
   },
 };

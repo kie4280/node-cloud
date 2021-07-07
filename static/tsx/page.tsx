@@ -7,7 +7,7 @@ class HomePage extends React.Component {
   render() {
     return (
       <div>
-        <h1>Hi</h1>
+        <h1>Home</h1>
       </div>
     );
   }
@@ -27,4 +27,18 @@ class DashPage extends React.Component {
   }
 }
 
-export { HomePage , DashPage};
+class FolderPage extends React.Component {
+  constructor(props) {
+    super(props);
+  }
+
+  render() {
+    return (
+      <div>
+        <h1>folders</h1>
+      </div>
+    );
+  }
+}
+
+export { HomePage, DashPage, FolderPage };

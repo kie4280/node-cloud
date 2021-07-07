@@ -1,6 +1,6 @@
 import ngrok from "ngrok";
 import { loadConfig, NODE_CONFIG } from "../config";
-import { Firebase, NODE } from "./firebase";
+import { Firebase, NODE } from "../firebase";
 import axios from "axios";
 
 let fireb: Firebase = undefined;

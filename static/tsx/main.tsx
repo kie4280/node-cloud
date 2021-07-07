@@ -95,36 +95,6 @@ class SideBar extends React.Component<any, any> {
   }
 }
 
-const mainscreen = (
-  <div className="horizontal-panel-divider">
-    <SideBar />
-    <div className="tab-content" id="myTabContent">
-      <div
-        className="tab-pane fade show active"
-        id="home-tab"
-        role="tabpanel"
-        aria-labelledby="home-tab"
-      >
-        <HomePage />
-      </div>
-      <div
-        className="tab-pane fade"
-        id="dashboard-tab"
-        role="tabpanel"
-        aria-labelledby="dashboard-tab"
-      >
-        <DashPage />
-      </div>
-      <div
-        className="tab-pane fade"
-        id="contact"
-        role="tabpanel"
-        aria-labelledby="contact-tab"
-      ></div>
-    </div>
-  </div>
-);
-
 interface Main_state {
   showing: string;
 }
@@ -139,7 +109,35 @@ class Main extends React.Component<any, Main_state> {
     let show = undefined;
     switch (this.state.showing) {
       case "Main":
-        show = mainscreen;
+        show = (
+          <div className="horizontal-panel-divider">
+            <SideBar />
+            <div className="tab-content" id="myTabContent">
+              <div
+                className="tab-pane fade show active"
+                id="home-tab"
+                role="tabpanel"
+                aria-labelledby="home-tab"
+              >
+                <HomePage />
+              </div>
+              <div
+                className="tab-pane fade"
+                id="dashboard-tab"
+                role="tabpanel"
+                aria-labelledby="dashboard-tab"
+              >
+                <DashPage />
+              </div>
+              <div
+                className="tab-pane fade"
+                id="contact"
+                role="tabpanel"
+                aria-labelledby="contact-tab"
+              ></div>
+            </div>
+          </div>
+        );
         break;
       default:
         show = (

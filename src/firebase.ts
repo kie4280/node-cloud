@@ -1,5 +1,5 @@
 import firebase from "firebase";
-import { loadConfig } from "../config";
+import { loadConfig } from "./config";
 import admin from "firebase-admin";
 
 const nodeConfig = loadConfig();
