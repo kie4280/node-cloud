@@ -1,9 +1,9 @@
 import ngrok from "ngrok";
 import { loadConfig, NODE_CONFIG } from "../config";
-import { Firebase, NODE } from "../firebase";
+import { RealtimeDatabase, NODE } from "../firebase";
 import axios from "axios";
 
-let fireb: Firebase = undefined;
+let database: RealtimeDatabase = undefined;
 
 async function startNetwork(nodeConfig: NODE_CONFIG) {
   const url = await ngrok.connect({
@@ -19,16 +19,16 @@ async function startNetwork(nodeConfig: NODE_CONFIG) {
     node_name: nodeConfig.node_name,
     url: url,
   };
-  fireb = new Firebase(
+  database = new RealtimeDatabase(
     nodeConfig.node_name,
     nodeConfig.firebase_config.database_url
   );
-  await fireb.setNode(n);
+  await database.setNode(n);
   return nodeConfig;
 }
 
 async function discoverNodes(nodeConfig: NODE_CONFIG): Promise<Array<NODE>> {
-  const others = new Array(...fireb.getNodes());
+  const others = new Array(...database.getNodes());
   others.forEach((n, i, obj) => {
     if (n.node_name == nodeConfig.node_name) {
       others.splice(i, 1);
@@ -46,7 +46,7 @@ async function pingNodes(nodes: Array<NODE>) {
       if (status == 404) {
         const a = n;
         a.status = "offline";
-        fireb.setNode(a);
+        database.setNode(a);
       }
     } catch (err) {
       console.log("error at ping peers");

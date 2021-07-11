@@ -48,5 +48,8 @@ module.exports = {
         { from: /.*/, to: '/index.html' },
       ],
     },
+    watchOptions: {
+      ignored: ["**/node_modules"],
+    },
   },
 };

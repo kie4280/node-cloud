@@ -12,7 +12,7 @@ export type NODE = {
   is_master: boolean;
 };
 
-export class Firebase {
+export class RealtimeDatabase {
   app: admin.app.App;
   database: admin.database.Database;
   node_name: string;
@@ -61,7 +61,7 @@ export class Firebase {
 }
 
 function test() {
-  const f = new Firebase("node2", nodeConfig.firebase_config.database_url);
+  const f = new RealtimeDatabase("node2", nodeConfig.firebase_config.database_url);
   const n: NODE = {
     is_master: true,
     lastSeen: new Date().toUTCString(),

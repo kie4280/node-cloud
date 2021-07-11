@@ -1,4 +1,5 @@
 import * as React from "react";
+import { RealtimeDatabase, getDatabase } from "../ts/firebase";
 
 function HomePage(props) {
   return (
@@ -9,6 +10,7 @@ function HomePage(props) {
 }
 
 function DashPage(props) {
+  const db = getDatabase();
   return (
     <div>
       <h1>dash</h1>

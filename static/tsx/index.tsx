@@ -8,62 +8,49 @@ import {
   Switch,
   Route,
   Redirect,
-  withRouter,
+  useHistory,
+  useLocation,
 } from "react-router-dom";
 import PropTypes from "prop-types";
+import firebaseui from "firebaseui";
 
 interface App_context {
   signin: boolean;
-  userCred: firebase.auth.UserCredential;
+  user: firebase.User;
 }
 
 const AppContext = React.createContext<App_context>({
   signin: false,
-  userCred: undefined,
+  user: null,
 });
 
-class PrivateRoute extends React.Component<any, any> {
-  static contextType = AppContext;
-  context!: React.ContextType<typeof AppContext>;
+function PrivateRoute(props) {
+  const location = useLocation();
+  const context = React.useContext(AppContext);
 
-  static propTypes = {
-    match: PropTypes.object.isRequired,
-    location: PropTypes.object.isRequired,
-    history: PropTypes.object.isRequired,
-  };
-
-  constructor(props) {
-    super(props);
+  if (context.signin) {
+    return (
+      <Redirect
+        to={{ pathname: "/login", state: { from: location.pathname } }}
+      />
+    );
   }
-
-  render() {
-    const { match, location, history } = this.props;
-
-    if (!this.context.signin) {
-      return (
-        <Redirect
-          push
-          to={{ pathname: "/login", state: { from: location.pathname } }}
-        />
-      );
-    }
-    return <Route {...this.props}></Route>;
-  }
+  return <Route {...props}></Route>;
 }
-
-const PrivateRouter = withRouter(PrivateRoute);
 
 function App(props) {
   const [state, setState] = React.useState<App_context>({
     signin: false,
-    userCred: null,
+    user: null,
   });
+  console.log("user uid", firebase.auth().currentUser);
 
-  function onLogin(cred: firebase.auth.UserCredential) {
+  function onLogin(u: firebase.User) {
     setState({
       signin: true,
-      userCred: cred,
+      user: u,
     });
+    
     console.log("on login called");
   }
 
@@ -72,9 +59,9 @@ function App(props) {
       <AppContext.Provider value={state}>
         <Router>
           <Switch>
-            <PrivateRouter path="/home" exact>
+            <PrivateRoute path="/home" exact>
               <Main showing="Main" />
-            </PrivateRouter>
+            </PrivateRoute>
             <Route path="/" exact>
               <Redirect to="/home" />
             </Route>
@@ -84,7 +71,7 @@ function App(props) {
               </div>
             </Route>
             <Route path="/login" exact>
-              <LoginScreenRouter loginCB={onLogin} />
+              <WelcomeScreen loginCB={onLogin} />
             </Route>
 
             {/* show if not found */}
@@ -100,125 +87,98 @@ function App(props) {
   );
 }
 
-interface LoginScreen_state {
-  popHistory: boolean;
+interface WelcomeScreen_state {
+  stage: number;
 }
 
-class LoginScreen extends React.Component<any, LoginScreen_state> {
-  static contextType = AppContext;
-  context!: React.ContextType<typeof AppContext>;
-  private uiConfig;
-  static propTypes = {
-    match: PropTypes.object.isRequired,
-    location: PropTypes.object.isRequired,
-    history: PropTypes.object.isRequired,
+function WelcomeScreen(props) {
+  const context = React.useContext(AppContext);
+  const [state, setState] = React.useState<WelcomeScreen_state>({ stage: 0 });
+  const location = useLocation<any>();
+
+  const uiConfig = {
+    callbacks: {
+      signInSuccessWithAuthResult: (
+        authResult: firebase.auth.UserCredential
+      ) => {
+        // User successfully signed in.
+        // Return type determines whether we continue the redirect automatically
+        // or whether we leave that to developer to handle.
+
+        // props.loginCB(authResult);
+        console.log("user login")
+
+        return false;
+      },
+      uiShown: function () {},
+    },
+    // Will use popup for IDP Providers sign-in flow instead of the default, redirect.
+    signInFlow: "popup",
+    signInOptions: [
+      // Leave the lines as is for the providers you want to offer your users.
+      firebase.auth.GoogleAuthProvider.PROVIDER_ID,
+      firebase.auth.EmailAuthProvider.PROVIDER_ID,
+      firebase.auth.FacebookAuthProvider.PROVIDER_ID,
+    ],
+    // Terms of service url.
+    // tosUrl: "<your-tos-url>",
+    // Privacy policy url.
+    // privacyPolicyUrl: "<your-privacy-policy-url>",
   };
 
-  constructor(props) {
-    super(props);
-    this.state = {
-      popHistory: this.props.popHistory ? this.props.popHistory : false,
-    };
-    console.log("login constructed");
-    this.uiConfig = {
-      callbacks: {
-        signInSuccessWithAuthResult: (
-          authResult: firebase.auth.UserCredential
-        ) => {
-          // User successfully signed in.
-          // Return type determines whether we continue the redirect automatically
-          // or whether we leave that to developer to handle.
-
-          this.props.loginCB(authResult);
-
-          return false;
-        },
-        uiShown: function () {},
-      },
-      // Will use popup for IDP Providers sign-in flow instead of the default, redirect.
-      signInFlow: "popup",
-      signInOptions: [
-        // Leave the lines as is for the providers you want to offer your users.
-        firebase.auth.GoogleAuthProvider.PROVIDER_ID,
-        firebase.auth.EmailAuthProvider.PROVIDER_ID,
-        firebase.auth.FacebookAuthProvider.PROVIDER_ID,
-      ],
-      // Terms of service url.
-      // tosUrl: "<your-tos-url>",
-      // Privacy policy url.
-      // privacyPolicyUrl: "<your-privacy-policy-url>",
-    };
-  }
-
-  private showLoginUI() {
-    if (this.context.signin) {
-      return;
+  React.useEffect(() => {
+    if (!context.signin) {
+      ui.start("#firebaseui-auth-container", uiConfig);
     }
+  }, [context.signin]);
 
-    ui.start("#firebaseui-auth-container", this.uiConfig);
-  }
-
-  componentDidMount() {
-    this.showLoginUI();
-  }
-
-  componentDidUpdate() {
-    this.showLoginUI();
-  }
-
-  render() {
-    const { match, location, history } = this.props;
-    if (this.context.signin) {
-      if (location.state) {
-        return <Redirect to={location.state.from} />;
+  React.useEffect(() => {
+    firebase.auth().onAuthStateChanged((user) => {
+      if (user) {
+        props.loginDB(user);
+        console.log("login detected")
+      } else {
+        console.log("logout detected")
       }
-      return <Redirect to="/" />;
-    }
-    return (
-      <div className="container-md">
-        <h1 className="text-md-center">Login to continue</h1>
-        <div id="firebaseui-auth-container"></div>
-      </div>
-    );
-  }
-}
+    });
+  }, []);
 
-const LoginScreenRouter = withRouter(LoginScreen);
+  if (context.signin) {
+    if (location.state) {
+      return <Redirect to={location.state.from} />;
+    }
+    return <Redirect to="/home" />;
+  }
+  return (
+    <div className="container-md">
+      <h1 className="text-md-center">Login to continue</h1>
+      <div id="firebaseui-auth-container"></div>
+    </div>
+  );
+}
 
 interface LoadWindow_state {}
 
-class LoadWindow extends React.Component<any, LoadWindow_state> {
-  static contextType = AppContext;
-  context!: React.ContextType<typeof AppContext>;
-
-  constructor(props) {
-    super(props);
-  }
-
-  componentDidMount() {}
-  componentDidUpdate() {}
-
-  render() {
-    return (
-      <div className="container-fluid bg-primary align-content-center">
-        <div className="container-sm position-absolute top-50 start-50 translate-middle">
-          <h1 className="position-relative start-50 translate-middle">
-            Welcome
-          </h1>
-          <div className="progress">
-            <div
-              className="progress-bar progress-bar-striped progress-bar-animated bg-info"
-              role="progressbar"
-              aria-valuenow={75}
-              aria-valuemin={0}
-              aria-valuemax={100}
-              style={{ width: "25%" }}
-            />
-          </div>
+function LoadWindow(props) {
+  return (
+    <div className="container-fluid bg-primary align-content-center">
+      <div className="container-sm position-absolute top-50 start-50 translate-middle">
+        <h1 className="position-relative start-50 translate-middle">
+          {props.text}
+        </h1>
+        <div className="progress">
+          <div
+            className="progress-bar progress-bar-striped progress-bar-animated bg-info"
+            role="progressbar"
+            aria-valuenow={75}
+            aria-valuemin={0}
+            aria-valuemax={100}
+            style={{ width: "25%" }}
+          />
         </div>
       </div>
-    );
-  }
+    </div>
+  );
 }
 
 class ErrorScreen extends React.Component<any, any> {
