@@ -20,11 +20,11 @@
         {
             "type": "pwa-node",
             "request": "launch",
-            "name": "Launch peer_node",
+            "name": "Launch peer_node1",
             "skipFiles": [
                 "<node_internals>/**"
             ],
-            "program": "${workspaceFolder}/src/nodes/peer_node.ts",
+            "program": "${workspaceFolder}/tests/test_node1.ts",
             "outFiles": [
                 "${workspaceFolder}/ts-build/**/*.js"
             ],
@@ -37,7 +37,7 @@
             "skipFiles": [
                 "<node_internals>/**"
             ],
-            "program": "${workspaceFolder}/src/nodes/firebase.ts",
+            "program": "${workspaceFolder}/src/firebase.ts",
             "outFiles": [
                 "${workspaceFolder}/ts-build/**/*.js"
             ],

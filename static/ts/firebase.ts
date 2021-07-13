@@ -21,8 +21,6 @@ firebase
     console.log(err);
   });
 
-console.log("initialize firebase app");
-
 type NODE = {
   node_name: string;
   url: string;
@@ -36,17 +34,17 @@ class RealtimeDatabase {
   private nodes: Array<NODE>;
 
   constructor() {
+    this.nodes = [];
     this.database = firebase.database();
     this.database.ref("nodes").on("value", (snap) => {
-      if (!snap.exists()) {
-        this.nodes = [];
-      } else {
+      if (snap.exists()) {
         this.nodes = new Array<NODE>();
         snap.forEach((sn) => {
           this.nodes = this.nodes.concat([sn.toJSON() as NODE]);
         });
       }
     });
+    setInterval(this.pingNodes.bind(this), 5000);
   }
 
   public getNodes(): Array<NODE> {
@@ -61,6 +59,35 @@ class RealtimeDatabase {
   public async setNode(n: NODE) {
     const r = this.database.ref("nodes").child(n.node_name);
     const res = await r.set(n);
+  }
+
+  private pingNodes() {
+    this.nodes.forEach((v) => {
+      if (v.status == "online") {
+        fetch(`${v.url}/status`, {
+          method: "GET",
+          keepalive: true,
+          mode: "cors",
+        })
+          .then((res) => {
+            if (!res.ok) {
+              const vv = Object.assign({}, v);
+              vv.lastSeen = new Date().toUTCString();
+              vv.status = "offline";
+              vv.url = "";
+              getDatabase().setNode(vv);
+            }
+          })
+          .catch((err) => {
+            console.log(err);
+            const vv = Object.assign({}, v);
+              vv.lastSeen = new Date().toUTCString();
+              vv.status = "offline";
+              vv.url = "";
+              getDatabase().setNode(vv);
+          });
+      }
+    });
   }
 }
 

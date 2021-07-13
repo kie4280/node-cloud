@@ -19,6 +19,7 @@ export class RealtimeDatabase {
   private nodes: Array<NODE>;
 
   constructor(node_name: string, database_url) {
+    this.nodes = [];
     this.initialize(database_url);
     this.node_name = node_name;
   }
@@ -61,7 +62,10 @@ export class RealtimeDatabase {
 }
 
 function test() {
-  const f = new RealtimeDatabase("node2", nodeConfig.firebase_config.database_url);
+  const f = new RealtimeDatabase(
+    "node2",
+    nodeConfig.firebase_config.database_url
+  );
   const n: NODE = {
     is_master: true,
     lastSeen: new Date().toUTCString(),
@@ -69,12 +73,12 @@ function test() {
     status: "online",
     url: "test",
   };
-  f.setNode(n)
-    .then(() => {})
-    .catch((err) => {
-      console.log(err);
-    });
-  f.nodeCount();
+  // f.setNode(n)
+  //   .then(() => {})
+  //   .catch((err) => {
+  //     console.log(err);
+  //   });
+  console.log(f.getNodes());
 }
 
 // test();

@@ -1,9 +1,10 @@
 import express from "express";
 import express_session from "express-session";
+import cors from "cors";
 
 const app: express.Application = express();
 
-export function startServer(port: number) {
+function startServer(port: number) {
   app.listen(port, () => {
     console.log("http listening on " + port);
   });
@@ -17,6 +18,7 @@ export function startServer(port: number) {
       resave: false,
     })
   );
+  app.use(cors());
 
   // end middleware
 
@@ -31,3 +33,5 @@ export function startServer(port: number) {
 
   app.use(express.static("static"));
 }
+
+export { startServer };

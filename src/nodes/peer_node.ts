@@ -40,6 +40,7 @@ async function discoverNodes(nodeConfig: NODE_CONFIG): Promise<Array<NODE>> {
 
 async function pingNodes(nodes: Array<NODE>) {
   nodes.forEach(async (n, i, obj) => {
+    if (n.status == "offline" || n.status == "maintenance") return;
     try {
       const res = await axios.get(n.url + "/status");
       const status = res.data;

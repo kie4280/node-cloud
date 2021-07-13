@@ -11,8 +11,6 @@ import {
   useHistory,
   useLocation,
 } from "react-router-dom";
-import PropTypes from "prop-types";
-import firebaseui from "firebaseui";
 
 interface App_context {
   signin: boolean;
@@ -28,11 +26,9 @@ function PrivateRoute(props) {
   const location = useLocation();
   const context = React.useContext(AppContext);
 
-  if (context.signin) {
+  if (!context.signin) {
     return (
-      <Redirect
-        to={{ pathname: "/login", state: { from: location.pathname } }}
-      />
+      <Redirect to={{ pathname: "/", state: { from: location.pathname } }} />
     );
   }
   return <Route {...props}></Route>;
@@ -43,16 +39,18 @@ function App(props) {
     signin: false,
     user: null,
   });
-  console.log("user uid", firebase.auth().currentUser);
 
-  function onLogin(u: firebase.User) {
-    setState({
-      signin: true,
-      user: u,
+  React.useEffect(() => {
+    firebase.auth().onAuthStateChanged((user) => {
+      if (user) {
+        setState({ signin: true, user: user });
+        console.log("login detected");
+      } else {
+        setState({ signin: false, user: null });
+        console.log("logout detected");
+      }
     });
-    
-    console.log("on login called");
-  }
+  }, []);
 
   return (
     <ErrorScreen>
@@ -63,15 +61,13 @@ function App(props) {
               <Main showing="Main" />
             </PrivateRoute>
             <Route path="/" exact>
-              <Redirect to="/home" />
+              <WelcomeScreen />
             </Route>
+
             <Route path="/about" exact>
               <div>
                 <h1>about page</h1>
               </div>
-            </Route>
-            <Route path="/login" exact>
-              <WelcomeScreen loginCB={onLogin} />
             </Route>
 
             {/* show if not found */}
@@ -106,7 +102,7 @@ function WelcomeScreen(props) {
         // or whether we leave that to developer to handle.
 
         // props.loginCB(authResult);
-        console.log("user login")
+        console.log("user login");
 
         return false;
       },
@@ -125,23 +121,11 @@ function WelcomeScreen(props) {
     // Privacy policy url.
     // privacyPolicyUrl: "<your-privacy-policy-url>",
   };
-
   React.useEffect(() => {
     if (!context.signin) {
       ui.start("#firebaseui-auth-container", uiConfig);
     }
   }, [context.signin]);
-
-  React.useEffect(() => {
-    firebase.auth().onAuthStateChanged((user) => {
-      if (user) {
-        props.loginDB(user);
-        console.log("login detected")
-      } else {
-        console.log("logout detected")
-      }
-    });
-  }, []);
 
   if (context.signin) {
     if (location.state) {
