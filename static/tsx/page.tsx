@@ -37,6 +37,7 @@ function DashPage(props) {
       });
       setState({ nodes: ns });
     }, 5000);
+
     return () => {
       clearInterval(handle);
     };

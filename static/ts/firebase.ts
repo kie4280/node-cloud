@@ -35,16 +35,25 @@ class RealtimeDatabase {
 
   constructor() {
     this.nodes = [];
-    this.database = firebase.database();
-    this.database.ref("nodes").on("value", (snap) => {
-      if (snap.exists()) {
-        this.nodes = new Array<NODE>();
-        snap.forEach((sn) => {
-          this.nodes = this.nodes.concat([sn.toJSON() as NODE]);
+    setInterval(this.pingNodes.bind(this), 5000);
+    firebase.auth().onAuthStateChanged((user) => {
+      if (user) {
+        this.database = firebase.database();
+        this.database.ref("nodes").on("value", (snap) => {
+          if (snap.exists()) {
+            this.nodes = new Array<NODE>();
+            snap.forEach((sn) => {
+              this.nodes = this.nodes.concat([sn.toJSON() as NODE]);
+            });
+          }
         });
+      } else {
+        if (this.database) {
+          this.database.ref("nodes").off("value");
+          this.database = null;
+        }
       }
     });
-    setInterval(this.pingNodes.bind(this), 5000);
   }
 
   public getNodes(): Array<NODE> {
@@ -66,7 +75,6 @@ class RealtimeDatabase {
       if (v.status == "online") {
         fetch(`${v.url}/status`, {
           method: "GET",
-          keepalive: true,
           mode: "cors",
         })
           .then((res) => {
@@ -81,10 +89,10 @@ class RealtimeDatabase {
           .catch((err) => {
             console.log(err);
             const vv = Object.assign({}, v);
-              vv.lastSeen = new Date().toUTCString();
-              vv.status = "offline";
-              vv.url = "";
-              getDatabase().setNode(vv);
+            vv.lastSeen = new Date().toUTCString();
+            vv.status = "offline";
+            vv.url = "";
+            getDatabase().setNode(vv);
           });
       }
     });
